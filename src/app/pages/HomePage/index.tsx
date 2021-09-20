@@ -1,5 +1,4 @@
 import List from 'app/components/List/List';
-import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Display from 'app/components/Display/Display';
 import './index.css';
@@ -22,17 +21,8 @@ import {
 } from 'app/components/List/ListActions';
 
 function HomePage(props) {
-  function handleUpdate(e) {
+  function handleUpdate() {
     props.openUpdate();
-    // setList(() => {
-    //   return list.map(l => {
-    //     const { field } = l;
-    //     if (field === update) return { ...l, field: task.field };
-    //     else {
-    //       return l;
-    //     }
-    //   });
-    // });
     props.updateList(props.updatedText, props.task);
     props.closeUpdate();
   }
