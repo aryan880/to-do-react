@@ -10,59 +10,31 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { Button } from '@material-ui/core';
-import React from 'react';
-import { useRef } from 'react';
+import { connect } from 'react-redux';
+import {
+  addList,
+  addUpdatedTask,
+  closeUpdateDialog,
+  deleteList,
+  openUpdateDialog,
+  updateInfo,
+  updateList,
+} from 'app/components/List/ListActions';
 
-export function HomePage() {
-  const [task, setTask] = useState() as any;
-  const [list, setList] = useState([]) as any;
-  const [open, setOpen] = useState(false);
-  const [update, setUpdate] = useState('');
-
-  function onAdd(task) {
-    setList(prevList => {
-      return [...prevList, task];
-    });
-  }
-
-  function onDelete(id) {
-    setList(prevList => {
-      return list.filter((item, i) => {
-        return i !== id;
-      });
-    });
-  }
-
-  function onUpdate(id, text) {
-    setOpen(true);
-    setUpdate(text);
-  }
-
-  function handleClose() {
-    setOpen(false);
-  }
-
-  function handleUpdate() {
-    setList(() => {
-      return list.map(l => {
-        const { field } = l;
-        if (field === update) return { ...l, field: task.field };
-        else {
-          return l;
-        }
-      });
-    });
-    setOpen(false);
-  }
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setTask(prevState => {
-      return {
-        ...prevState,
-        [name]: value,
-      };
-    });
+function HomePage(props) {
+  function handleUpdate(e) {
+    props.openUpdate();
+    // setList(() => {
+    //   return list.map(l => {
+    //     const { field } = l;
+    //     if (field === update) return { ...l, field: task.field };
+    //     else {
+    //       return l;
+    //     }
+    //   });
+    // });
+    props.updateList(props.updatedText, props.task);
+    props.closeUpdate();
   }
 
   return (
@@ -72,13 +44,19 @@ export function HomePage() {
         <meta name="description" content="A Boilerplate application homepage" />
       </Helmet>
       <h1 className="heading">ToDo List</h1>
-      <List onAdd={onAdd} />
-      <Display onUpdate={onUpdate} onDelete={onDelete} item={list} />
+      <List onAdd={() => props.list(props.task)} />
+      <Display
+        onUpdate={(id, text) => {
+          props.openUpdate();
+          props.updateInfo(id, text);
+        }}
+        onDelete={id => props.delete(id)}
+        item={props.item}
+      />
       <Dialog
         fullWidth
         maxWidth="md"
-        open={open}
-        onClose={handleClose}
+        open={props.updateDialog}
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">Edit Task</DialogTitle>
@@ -92,11 +70,11 @@ export function HomePage() {
             label="Task..."
             type="text"
             fullWidth
-            onChange={handleChange}
+            onChange={e => props.updatedTask(e)}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={props.closeUpdate} color="primary">
             Cancel
           </Button>
           <Button onClick={handleUpdate} color="primary">
@@ -107,3 +85,30 @@ export function HomePage() {
     </>
   );
 }
+const mapStateToProps = state => {
+  console.log(state);
+  return {
+    task: state.task,
+    item: state.list.list,
+    updateDialog: state.updateDialog.updateOpen,
+    updatedText: state.update.text,
+  };
+};
+const mapDispatchToProps = dispatch => {
+  return {
+    list: task => dispatch(addList(task)),
+    delete: id => dispatch(deleteList(id)),
+    openUpdate: () => dispatch(openUpdateDialog()),
+    closeUpdate: () => dispatch(closeUpdateDialog()),
+    updatedTask: e => dispatch(addUpdatedTask(e)),
+    updateInfo: (id, text) => dispatch(updateInfo(id, text)),
+    updateList: (updateInfo, task) => dispatch(updateList(updateInfo, task)),
+  };
+};
+
+const HomePageContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(HomePage);
+
+export { HomePageContainer };

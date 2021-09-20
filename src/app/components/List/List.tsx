@@ -1,6 +1,5 @@
 import { Fab } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
-import { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -11,48 +10,21 @@ import { Button } from '@material-ui/core';
 import { StylesProvider } from '@material-ui/styles';
 
 import './List.css';
+import { connect } from 'react-redux';
+import { addTask, closeDialog, openDialog } from './ListActions';
 
 function List(props) {
-  const [open, setOpen] = useState(false);
-  const [task, setTask] = useState({
-    field: '',
-  });
-
-  function handleClick() {
-    setOpen(true);
-  }
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setTask(prevState => {
-      return {
-        ...prevState,
-        [name]: value,
-      };
-    });
-  }
-
-  function handleDialogSubmit() {
-    setOpen(false);
-    props.onAdd(task);
-  }
-
-  function handleClose() {
-    setOpen(false);
-  }
-
   return (
     <div>
       <StylesProvider injectFirst>
-        <Fab size="large" onClick={handleClick} aria-label="add">
+        <Fab size="large" onClick={props.open} aria-label="add">
           <Add />
         </Fab>
       </StylesProvider>
       <Dialog
         fullWidth
         maxWidth="md"
-        open={open}
-        onClose={handleClose}
+        open={props.condition}
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">Add Task</DialogTitle>
@@ -66,14 +38,20 @@ function List(props) {
             label="Task..."
             type="text"
             fullWidth
-            onChange={handleChange}
+            onChange={e => props.task(e)}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button id="cancel" onClick={props.close} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleDialogSubmit} color="primary">
+          <Button
+            onClick={() => {
+              props.onAdd();
+              props.close();
+            }}
+            color="primary"
+          >
             Add
           </Button>
         </DialogActions>
@@ -81,5 +59,20 @@ function List(props) {
     </div>
   );
 }
+const mapStateToProps = state => {
+  console.log(state);
+  return {
+    condition: state.dialog.open,
+    item: state.task,
+  };
+};
 
-export default List;
+const mapDispatchToProps = dispatch => {
+  return {
+    open: () => dispatch(openDialog()),
+    close: () => dispatch(closeDialog()),
+    task: e => dispatch(addTask(e)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(List);

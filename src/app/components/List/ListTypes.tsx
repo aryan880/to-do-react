@@ -1,0 +1,10 @@
+export const OPEN_DIALOG = 'OPEN_DIALOG';
+export const CLOSE_DIALOG = 'CLOSE_DIALOG';
+export const ADD_TASK = 'ADD_TASK';
+export const ADD_LIST = 'ADD_LIST';
+export const DELETE_LIST = 'DELETE_LIST';
+export const OPEN_UPDATE_DIALOG = 'OPEN_UPDATE_DIALOG';
+export const CLOSE_UPDATE_DIALOG = 'CLOSE_UPDATE_DIALOG';
+export const ADD_UPDATED_TASK = 'ADD_UPDATED_TASK';
+export const UPDATE_INFO = 'UPDATE_INFO';
+export const UPDATE_LIST = 'UPDATE_LIST';
