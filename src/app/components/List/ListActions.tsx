@@ -7,6 +7,8 @@ import {
   DELETE_LIST,
   OPEN_DIALOG,
   OPEN_UPDATE_DIALOG,
+  RESET_CHECKED,
+  SET_CHECKED,
   UPDATE_INFO,
   UPDATE_LIST,
 } from './ListTypes';
@@ -74,5 +76,18 @@ export const updateInfo = (id, text) => {
   return {
     type: UPDATE_INFO,
     payload: [id, text],
+  };
+};
+
+export const setCheck = value => {
+  return {
+    type: SET_CHECKED,
+    payload: value,
+  };
+};
+
+export const resetChecked = () => {
+  return {
+    type: RESET_CHECKED,
   };
 };

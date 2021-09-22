@@ -13,6 +13,7 @@ import { StylesProvider } from '@material-ui/styles';
 import { Tooltip } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
+import { setCheck } from '../List/ListActions';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -26,20 +27,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function Display(props) {
   const classes = useStyles();
-  const [checked, setChecked] = React.useState([]) as any;
-
-  const handleToggle = i => {
-    const currentIndex = checked.indexOf(i);
-    const newChecked = [...checked];
-
-    if (currentIndex === -1) {
-      newChecked.push(i);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-
-    setChecked(newChecked);
-  };
 
   function onDragEnd(result) {
     const { destination, source, draggableId } = result;
@@ -53,6 +40,8 @@ function Display(props) {
     ) {
       return;
     }
+
+    console.log(destination, source, draggableId);
   }
   return (
     <StylesProvider injectFirst>
@@ -65,7 +54,7 @@ function Display(props) {
                 {...provided.droppableProps}
                 className={classes.root}
               >
-                {props.item.map((task, index) => {
+                {props.arrayList.map((task, index) => {
                   const labelId = `checkbox-list-label-${index}`;
                   return (
                     <Draggable draggableId={labelId} index={index}>
@@ -76,7 +65,7 @@ function Display(props) {
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             onClick={() => {
-                              handleToggle(index);
+                              props.checkBoxToggle(index);
                             }}
                             key={index}
                             id={index}
@@ -90,13 +79,15 @@ function Display(props) {
                                 tabIndex={-1}
                                 disableRipple
                                 inputProps={{ 'aria-labelledby': labelId }}
-                                checked={checked.indexOf(index) !== -1}
+                                checked={
+                                  props.checkedState.indexOf(index) !== -1
+                                }
                               />
                             </ListItemIcon>
                             <ListItemText
                               style={{
                                 textDecoration:
-                                  checked.indexOf(index) !== -1
+                                  props.checkedState.indexOf(index) !== -1
                                     ? 'line-through'
                                     : 'none',
                               }}
@@ -141,11 +132,16 @@ function Display(props) {
   );
 }
 const mapStateToProps = state => {
-  return {};
+  return {
+    arrayList: state.list.list,
+    checkedState: state.checkBox.checked,
+  };
 };
 
 const mapDispatchToProps = dispatch => {
-  return {};
+  return {
+    checkBoxToggle: v => dispatch(setCheck(v)),
+  };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Display);

@@ -12,6 +12,8 @@ import {
   DELETE_LIST,
   OPEN_DIALOG,
   OPEN_UPDATE_DIALOG,
+  RESET_CHECKED,
+  SET_CHECKED,
   UPDATE_INFO,
   UPDATE_LIST,
 } from 'app/components/List/ListTypes';
@@ -41,6 +43,10 @@ const initialUpdateOpenState = {
 const initialUpdateInfo = {
   id: '',
   text: '',
+};
+
+const initialCheckState = {
+  checked: [] as any,
 };
 
 const dialogReducer = (state = initialOpenState, action) => {
@@ -138,6 +144,30 @@ const updateInfoReducer = (state = initialUpdateInfo, action) => {
   }
 };
 
+const checkReducer = (state = initialCheckState, action) => {
+  switch (action.type) {
+    case SET_CHECKED:
+      const currentIndex = state.checked.indexOf(action.payload);
+      const newChecked = [...state.checked];
+      if (currentIndex === -1) {
+        newChecked.push(action.payload);
+      } else {
+        newChecked.splice(currentIndex, 1);
+      }
+      return {
+        ...state,
+        checked: newChecked,
+      };
+    case RESET_CHECKED:
+      return {
+        ...state,
+        checked: [],
+      };
+    default:
+      return state;
+  }
+};
+
 export function createReducer(injectedReducers: InjectedReducersType = {}) {
   // Initially we don't have any injectedReducers, so returning identity function to avoid the error
   return combineReducers({
@@ -147,5 +177,6 @@ export function createReducer(injectedReducers: InjectedReducersType = {}) {
     list: listReducer,
     update: updateInfoReducer,
     updateDialog: updateDialogReducer,
+    checkBox: checkReducer,
   });
 }
