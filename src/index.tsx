@@ -24,17 +24,21 @@ import { configureAppStore } from 'store/configureStore';
 
 import reportWebVitals from 'reportWebVitals';
 
+import { PersistGate } from 'redux-persist/integration/react';
+
 // Initialize languages
 import './locales/i18n';
 
-const store = configureAppStore();
+const store = configureAppStore() as any;
 const MOUNT_NODE = document.getElementById('root') as HTMLElement;
 
 ReactDOM.render(
-  <Provider store={store}>
+  <Provider store={store.store}>
     <HelmetProvider>
       <React.StrictMode>
-        <App />
+        <PersistGate loading={null} persistor={store.persistor}>
+          <App />
+        </PersistGate>
       </React.StrictMode>
     </HelmetProvider>
   </Provider>,

@@ -1,5 +1,11 @@
 .MuiFab-root {
-  position: absolute;
+  position: fixed;
   right: 100px;
   bottom: 100px;
+
+}
+.MuiAlert-root {
+  position: absolute;
+  bottom: 200px;
+  right: 100px;
 }

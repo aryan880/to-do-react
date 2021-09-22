@@ -12,6 +12,7 @@ import { Button } from '@material-ui/core';
 import { connect } from 'react-redux';
 import {
   addList,
+  addTask,
   addUpdatedTask,
   closeUpdateDialog,
   deleteList,
@@ -23,7 +24,8 @@ import {
 function HomePage(props) {
   function handleUpdate() {
     props.openUpdate();
-    props.updateList(props.updatedText, props.task);
+    props.updatedTask('');
+    props.updateList(props.infoId, props.task.field);
     props.closeUpdate();
   }
 
@@ -34,20 +36,34 @@ function HomePage(props) {
         <meta name="description" content="A Boilerplate application homepage" />
       </Helmet>
       <h1 className="heading">ToDo List</h1>
-      <List onAdd={() => props.list(props.task)} />
-      <Display
-        onUpdate={(id, text) => {
-          props.openUpdate();
-          props.updateInfo(id, text);
+      <List
+        onAdd={() => {
+          props.list(props.task);
+          props.addTask('');
         }}
-        onDelete={id => props.delete(id)}
-        item={props.item}
       />
+      {props.listArray.length !== 0 ? (
+        <Display
+          onUpdate={(id, text) => {
+            props.openUpdate();
+            props.updateInfo(id, text);
+            props.updatedTask(text);
+          }}
+          onDelete={id => props.delete(id)}
+          item={props.item}
+        />
+      ) : (
+        ''
+      )}
       <Dialog
         fullWidth
         maxWidth="md"
         open={props.updateDialog}
         aria-labelledby="form-dialog-title"
+        onClose={() => {
+          props.closeUpdate();
+          props.updatedTask('');
+        }}
       >
         <DialogTitle id="form-dialog-title">Edit Task</DialogTitle>
         <DialogContent>
@@ -60,14 +76,30 @@ function HomePage(props) {
             label="Task..."
             type="text"
             fullWidth
-            onChange={e => props.updatedTask(e)}
+            onChange={e => props.updatedTask(e.target.value)}
+            defaultValue={props.infoText}
+            onKeyPress={e => {
+              if (e.key === 'Enter' && props.task.field.length !== 0) {
+                handleUpdate();
+              }
+            }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={props.closeUpdate} color="primary">
+          <Button
+            onClick={() => {
+              props.closeUpdate();
+              props.updatedTask('');
+            }}
+            color="primary"
+          >
             Cancel
           </Button>
-          <Button onClick={handleUpdate} color="primary">
+          <Button
+            disabled={props.task.field.length !== 0 ? false : true}
+            onClick={handleUpdate}
+            color="primary"
+          >
             Update
           </Button>
         </DialogActions>
@@ -81,7 +113,9 @@ const mapStateToProps = state => {
     task: state.task,
     item: state.list.list,
     updateDialog: state.updateDialog.updateOpen,
-    updatedText: state.update.text,
+    listArray: state.list.list,
+    infoId: state.update.id,
+    infoText: state.update.text,
   };
 };
 const mapDispatchToProps = dispatch => {
@@ -90,7 +124,8 @@ const mapDispatchToProps = dispatch => {
     delete: id => dispatch(deleteList(id)),
     openUpdate: () => dispatch(openUpdateDialog()),
     closeUpdate: () => dispatch(closeUpdateDialog()),
-    updatedTask: e => dispatch(addUpdatedTask(e)),
+    addTask: v => dispatch(addTask(v)),
+    updatedTask: v => dispatch(addUpdatedTask(v)),
     updateInfo: (id, text) => dispatch(updateInfo(id, text)),
     updateList: (updateInfo, task) => dispatch(updateList(updateInfo, task)),
   };

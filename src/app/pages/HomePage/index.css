@@ -4,5 +4,13 @@
 }
 
 body {
-  background-image: linear-gradient(to right top, #a0b562, #927c44, #6e4b35, #3b2624, #000000);
+  background-image: linear-gradient(
+    to top,
+    #161c25,
+    #1d2e43,
+    #214264,
+    #225686,
+    #1c6caa
+  );
+  background-attachment: fixed;
 }

@@ -92,12 +92,12 @@ const listReducer = (state = initialList, action) => {
         }),
       };
     case UPDATE_LIST:
+      console.log(action.payload);
       return {
         ...state,
-        list: state.list.map(l => {
-          const { field } = l;
-          if (field === action.payload[0]) {
-            return { ...l, field: action.payload[1].field };
+        list: state.list.map((l, index) => {
+          if (index === action.payload[0]) {
+            return { ...l, field: action.payload[1] };
           } else {
             return l;
           }
@@ -130,7 +130,8 @@ const updateInfoReducer = (state = initialUpdateInfo, action) => {
     case UPDATE_INFO:
       return {
         ...state,
-        text: action.payload,
+        id: action.payload[0],
+        text: action.payload[1],
       };
     default:
       return state;

@@ -23,19 +23,17 @@ export const closeDialog = () => {
   };
 };
 
-export const addTask = e => {
-  console.log(e);
+export const addTask = v => {
   return {
     type: ADD_TASK,
-    payload: e.target.value,
+    payload: v,
   };
 };
 
-export const addUpdatedTask = e => {
-  console.log(e);
+export const addUpdatedTask = v => {
   return {
     type: ADD_UPDATED_TASK,
-    payload: e.target.value,
+    payload: v,
   };
 };
 
@@ -53,10 +51,10 @@ export const deleteList = id => {
   };
 };
 
-export const updateList = (text, task) => {
+export const updateList = (id, text) => {
   return {
     type: UPDATE_LIST,
-    payload: [text, task],
+    payload: [id, text],
   };
 };
 
@@ -75,6 +73,6 @@ export const closeUpdateDialog = () => {
 export const updateInfo = (id, text) => {
   return {
     type: UPDATE_INFO,
-    payload: text,
+    payload: [id, text],
   };
 };
