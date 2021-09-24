@@ -5,6 +5,7 @@ import {
   CLOSE_DIALOG,
   CLOSE_UPDATE_DIALOG,
   DELETE_LIST,
+  DND_UPDATE_LIST,
   OPEN_DIALOG,
   OPEN_UPDATE_DIALOG,
   RESET_CHECKED,
@@ -89,5 +90,12 @@ export const setCheck = value => {
 export const resetChecked = () => {
   return {
     type: RESET_CHECKED,
+  };
+};
+
+export const dndUpdateList = arr => {
+  return {
+    type: DND_UPDATE_LIST,
+    payload: arr,
   };
 };

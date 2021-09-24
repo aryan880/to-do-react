@@ -10,6 +10,7 @@ import {
   CLOSE_DIALOG,
   CLOSE_UPDATE_DIALOG,
   DELETE_LIST,
+  DND_UPDATE_LIST,
   OPEN_DIALOG,
   OPEN_UPDATE_DIALOG,
   RESET_CHECKED,
@@ -108,6 +109,11 @@ const listReducer = (state = initialList, action) => {
             return l;
           }
         }),
+      };
+    case DND_UPDATE_LIST:
+      return {
+        ...state,
+        list: action.payload,
       };
     default:
       return state;

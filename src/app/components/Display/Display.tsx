@@ -13,7 +13,7 @@ import { StylesProvider } from '@material-ui/styles';
 import { Tooltip } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
-import { setCheck } from '../List/ListActions';
+import { dndUpdateList, resetChecked, setCheck } from '../List/ListActions';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -42,6 +42,18 @@ function Display(props) {
     }
 
     console.log(destination, source, draggableId);
+    let sourceValue;
+
+    sourceValue = props.arrayList.filter((l, i) => {
+      return i === source.index;
+    });
+
+    let newArr = [...props.arrayList];
+    newArr.splice(source.index, 1);
+    newArr.splice(destination.index, 0, ...sourceValue);
+    console.log(newArr);
+    props.dndUpdate(newArr);
+    props.checkBoxReset();
   }
   return (
     <StylesProvider injectFirst>
@@ -132,6 +144,7 @@ function Display(props) {
   );
 }
 const mapStateToProps = state => {
+  console.log(state.list.list);
   return {
     arrayList: state.list.list,
     checkedState: state.checkBox.checked,
@@ -141,6 +154,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     checkBoxToggle: v => dispatch(setCheck(v)),
+    dndUpdate: arr => dispatch(dndUpdateList(arr)),
+    checkBoxReset: () => dispatch(resetChecked()),
   };
 };
 

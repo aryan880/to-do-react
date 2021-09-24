@@ -18,7 +18,6 @@ import {
   deleteList,
   openUpdateDialog,
   resetChecked,
-  setCheck,
   updateInfo,
   updateList,
 } from 'app/components/List/ListActions';
