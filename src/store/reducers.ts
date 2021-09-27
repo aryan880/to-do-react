@@ -90,7 +90,10 @@ const listReducer = (state = initialList, action) => {
     case ADD_LIST:
       return {
         ...state,
-        list: [...state.list, action.payload],
+        list: [
+          ...state.list,
+          { id: uuidv4(), value: action.payload, isDone: false },
+        ],
       };
     case DELETE_LIST:
       return {
