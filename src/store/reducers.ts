@@ -13,13 +13,14 @@ import {
   DND_UPDATE_LIST,
   OPEN_DIALOG,
   OPEN_UPDATE_DIALOG,
-  RESET_CHECKED,
   SET_CHECKED,
+  UPDATE_CHECKED,
   UPDATE_INFO,
   UPDATE_LIST,
 } from 'app/components/List/ListTypes';
 
 import { InjectedReducersType } from 'utils/types/injector-typings';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Merges the main reducer with the router state and dynamically injected reducers
@@ -164,11 +165,11 @@ const checkReducer = (state = initialCheckState, action) => {
         ...state,
         checked: newChecked,
       };
-    case RESET_CHECKED:
+    case UPDATE_CHECKED:
       return {
         ...state,
-        checked: [],
       };
+
     default:
       return state;
   }

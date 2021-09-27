@@ -10,4 +10,4 @@ export const UPDATE_INFO = 'UPDATE_INFO';
 export const UPDATE_LIST = 'UPDATE_LIST';
 export const DND_UPDATE_LIST = 'DND_UPDATE_LIST';
 export const SET_CHECKED = 'SET_CHECKED';
-export const RESET_CHECKED = 'RESET_CHECKED';
+export const UPDATE_CHECKED = 'UPDATE_CHECKED';

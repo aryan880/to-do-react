@@ -3,7 +3,6 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
@@ -13,7 +12,8 @@ import { StylesProvider } from '@material-ui/styles';
 import { Tooltip } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
-import { dndUpdateList, resetChecked, setCheck } from '../List/ListActions';
+import { dndUpdateList, setCheck, updateChecked } from '../List/ListActions';
+import { v4 as uuidv4 } from 'uuid';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -53,7 +53,8 @@ function Display(props) {
     newArr.splice(destination.index, 0, ...sourceValue);
     console.log(newArr);
     props.dndUpdate(newArr);
-    props.checkBoxReset();
+
+    // props.checkBoxUpdate(source.index, destination.index);
   }
   return (
     <StylesProvider injectFirst>
@@ -76,17 +77,15 @@ function Display(props) {
                             innerRef={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            onClick={() => {
-                              props.checkBoxToggle(index);
-                            }}
                             key={index}
                             id={index}
                             role={undefined}
-                            dense
-                            button
                           >
                             <ListItemIcon>
                               <Checkbox
+                                onClick={() => {
+                                  props.checkBoxToggle(index);
+                                }}
                                 edge="start"
                                 tabIndex={-1}
                                 disableRipple
@@ -106,28 +105,26 @@ function Display(props) {
                               id={labelId}
                               primary={`${task.field}`}
                             />
-                            <ListItemSecondaryAction>
-                              <Tooltip title="Update">
-                                <IconButton
-                                  onClick={() =>
-                                    props.onUpdate(index, task.field)
-                                  }
-                                  edge="end"
-                                  aria-label="update"
-                                >
-                                  <Update />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Delete">
-                                <IconButton
-                                  onClick={() => props.onDelete(index)}
-                                  edge="end"
-                                  aria-label="delete"
-                                >
-                                  <Delete />
-                                </IconButton>
-                              </Tooltip>
-                            </ListItemSecondaryAction>
+                            <Tooltip title="Update">
+                              <IconButton
+                                onClick={() =>
+                                  props.onUpdate(index, task.field)
+                                }
+                                edge="end"
+                                aria-label="update"
+                              >
+                                <Update />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                              <IconButton
+                                onClick={() => props.onDelete(index)}
+                                edge="end"
+                                aria-label="delete"
+                              >
+                                <Delete />
+                              </IconButton>
+                            </Tooltip>
                           </ListItem>
                         );
                       }}
@@ -143,6 +140,7 @@ function Display(props) {
     </StylesProvider>
   );
 }
+
 const mapStateToProps = state => {
   console.log(state.list.list);
   return {
@@ -155,7 +153,7 @@ const mapDispatchToProps = dispatch => {
   return {
     checkBoxToggle: v => dispatch(setCheck(v)),
     dndUpdate: arr => dispatch(dndUpdateList(arr)),
-    checkBoxReset: () => dispatch(resetChecked()),
+    // checkBoxUpdate: (s, d) => dispatch(updateChecked(s, d)),
   };
 };
 

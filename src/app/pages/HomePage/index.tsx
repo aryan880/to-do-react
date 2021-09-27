@@ -17,7 +17,6 @@ import {
   closeUpdateDialog,
   deleteList,
   openUpdateDialog,
-  resetChecked,
   updateInfo,
   updateList,
 } from 'app/components/List/ListActions';
@@ -52,7 +51,6 @@ function HomePage(props) {
           }}
           onDelete={id => {
             props.delete(id);
-            props.checkBoxReset();
           }}
           item={props.item}
         />
@@ -132,7 +130,6 @@ const mapDispatchToProps = dispatch => {
     updatedTask: v => dispatch(addUpdatedTask(v)),
     updateInfo: (id, text) => dispatch(updateInfo(id, text)),
     updateList: (updateInfo, task) => dispatch(updateList(updateInfo, task)),
-    checkBoxReset: () => dispatch(resetChecked()),
   };
 };
 

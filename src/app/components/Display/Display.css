@@ -1,7 +1,10 @@
 .MuiList-root {
   margin: auto;
   margin-top: 100px;
+  border-radius: 6px;
+  padding: 10px;
+  box-shadow: -4px 5px 18px 0px rgba(0, 0, 0, 0.75);
 }
-.MuiListItemText-root	{
+.MuiListItemText-root {
   margin-right: 50px;
 }

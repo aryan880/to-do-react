@@ -8,8 +8,8 @@ import {
   DND_UPDATE_LIST,
   OPEN_DIALOG,
   OPEN_UPDATE_DIALOG,
-  RESET_CHECKED,
   SET_CHECKED,
+  UPDATE_CHECKED,
   UPDATE_INFO,
   UPDATE_LIST,
 } from './ListTypes';
@@ -87,9 +87,10 @@ export const setCheck = value => {
   };
 };
 
-export const resetChecked = () => {
+export const updateChecked = id => {
   return {
-    type: RESET_CHECKED,
+    type: UPDATE_CHECKED,
+    payload: id,
   };
 };
 
