@@ -33,12 +33,10 @@ const store = configureAppStore() as any;
 const MOUNT_NODE = document.getElementById('root') as HTMLElement;
 
 ReactDOM.render(
-  <Provider store={store.store}>
+  <Provider store={store}>
     <HelmetProvider>
       <React.StrictMode>
-        <PersistGate loading={null} persistor={store.persistor}>
-          <App />
-        </PersistGate>
+        <App />
       </React.StrictMode>
     </HelmetProvider>
   </Provider>,

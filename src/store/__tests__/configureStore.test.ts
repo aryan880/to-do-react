@@ -13,7 +13,7 @@ describe('configureStore', () => {
   });
 
   it('should return an empty store', () => {
-    const store = configureAppStore().store as any;
+    const store = configureAppStore() as any;
     expect(store.getState()).toBeUndefined();
   });
 });
