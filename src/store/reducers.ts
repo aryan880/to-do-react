@@ -14,13 +14,13 @@ import {
   OPEN_DIALOG,
   OPEN_UPDATE_DIALOG,
   SET_CHECKED,
-  UPDATE_CHECKED,
   UPDATE_INFO,
   UPDATE_LIST,
 } from 'app/components/List/ListTypes';
 
 import { InjectedReducersType } from 'utils/types/injector-typings';
 import { v4 as uuidv4 } from 'uuid';
+import _ from 'lodash';
 
 /**
  * Merges the main reducer with the router state and dynamically injected reducers
@@ -86,38 +86,88 @@ const taskReducer = (state = initialTask, action) => {
 };
 
 const listReducer = (state = initialList, action) => {
+  let list;
   switch (action.type) {
     case ADD_LIST:
+      list = state.list;
+      let sortOrder = 1;
+
+      if (list.length > 0) {
+        const task = _.maxBy(list, todo => {
+          return todo.sortOrder;
+        });
+
+        sortOrder = task.sortOrder + 1;
+      }
+
       return {
         ...state,
         list: [
           ...state.list,
-          { id: uuidv4(), value: action.payload, isDone: false },
+          {
+            id: uuidv4(),
+            value: action.payload.field,
+            isDone: false,
+            sortOrder,
+          },
         ],
       };
     case DELETE_LIST:
       return {
         ...state,
-        list: state.list.filter((item, i) => {
-          return i !== action.payload;
+        list: state.list.filter(item => {
+          return item.id !== action.payload.id;
         }),
       };
     case UPDATE_LIST:
-      console.log(action.payload);
       return {
         ...state,
-        list: state.list.map((l, index) => {
-          if (index === action.payload[0]) {
-            return { ...l, field: action.payload[1] };
+        list: state.list.map(l => {
+          if (l.id === action.payload[0]) {
+            return { ...l, value: action.payload[1] };
           } else {
             return l;
           }
         }),
       };
     case DND_UPDATE_LIST:
+      list = _.cloneDeep(state.list);
+
+      const source = _.find(list, (item, index) => {
+        return index === action.payload.source;
+      });
+
+      const destination = _.find(list, (item, index) => {
+        return index === action.payload.destination;
+      });
+
+      list = list.map((l, index) => {
+        if (index === action.payload.source) {
+          return { ...l, sortOrder: destination.sortOrder };
+        }
+
+        if (index === action.payload.destination) {
+          return { ...l, sortOrder: source.sortOrder };
+        }
+        return l;
+      });
+
+      list = _.sortBy(list, i => i.sortOrder);
+
       return {
         ...state,
-        list: action.payload,
+        list,
+      };
+    case SET_CHECKED:
+      return {
+        ...state,
+        list: state.list.map(l => {
+          if (l.id === action.payload.id) {
+            return { ...l, isDone: action.payload.value };
+          } else {
+            return l;
+          }
+        }),
       };
     default:
       return state;
@@ -154,30 +204,6 @@ const updateInfoReducer = (state = initialUpdateInfo, action) => {
   }
 };
 
-const checkReducer = (state = initialCheckState, action) => {
-  switch (action.type) {
-    case SET_CHECKED:
-      const currentIndex = state.checked.indexOf(action.payload);
-      const newChecked = [...state.checked];
-      if (currentIndex === -1) {
-        newChecked.push(action.payload);
-      } else {
-        newChecked.splice(currentIndex, 1);
-      }
-      return {
-        ...state,
-        checked: newChecked,
-      };
-    case UPDATE_CHECKED:
-      return {
-        ...state,
-      };
-
-    default:
-      return state;
-  }
-};
-
 export function createReducer(injectedReducers: InjectedReducersType = {}) {
   // Initially we don't have any injectedReducers, so returning identity function to avoid the error
   return combineReducers({
@@ -187,6 +213,5 @@ export function createReducer(injectedReducers: InjectedReducersType = {}) {
     list: listReducer,
     update: updateInfoReducer,
     updateDialog: updateDialogReducer,
-    checkBox: checkReducer,
   });
 }

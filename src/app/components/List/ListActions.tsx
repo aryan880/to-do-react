@@ -50,7 +50,7 @@ export const addList = task => {
 export const deleteList = id => {
   return {
     type: DELETE_LIST,
-    payload: id,
+    payload: { id },
   };
 };
 
@@ -80,10 +80,13 @@ export const updateInfo = (id, text) => {
   };
 };
 
-export const setCheck = value => {
+export const setCheck = (id, value) => {
   return {
     type: SET_CHECKED,
-    payload: value,
+    payload: {
+      id,
+      value,
+    },
   };
 };
 
@@ -94,9 +97,12 @@ export const updateChecked = id => {
   };
 };
 
-export const dndUpdateList = arr => {
+export const dndUpdateList = (destination, source) => {
   return {
     type: DND_UPDATE_LIST,
-    payload: arr,
+    payload: {
+      destination,
+      source,
+    },
   };
 };

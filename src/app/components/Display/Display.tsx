@@ -13,7 +13,7 @@ import { Tooltip } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { dndUpdateList, setCheck, updateChecked } from '../List/ListActions';
-import { v4 as uuidv4 } from 'uuid';
+import _ from 'lodash';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -29,7 +29,7 @@ function Display(props) {
   const classes = useStyles();
 
   function onDragEnd(result) {
-    const { destination, source, draggableId } = result;
+    const { destination, source } = result;
     if (!destination) {
       return;
     }
@@ -41,20 +41,7 @@ function Display(props) {
       return;
     }
 
-    console.log(destination, source, draggableId);
-    let sourceValue;
-
-    sourceValue = props.arrayList.filter((l, i) => {
-      return i === source.index;
-    });
-
-    let newArr = [...props.arrayList];
-    newArr.splice(source.index, 1);
-    newArr.splice(destination.index, 0, ...sourceValue);
-    console.log(newArr);
-    props.dndUpdate(newArr);
-
-    // props.checkBoxUpdate(source.index, destination.index);
+    props.dndUpdate(destination.index, source.index);
   }
   return (
     <StylesProvider injectFirst>
@@ -68,47 +55,50 @@ function Display(props) {
                 className={classes.root}
               >
                 {props.arrayList.map((task, index) => {
-                  const labelId = `checkbox-list-label-${index}`;
+                  console.log(task);
                   return (
-                    <Draggable draggableId={labelId} index={index}>
+                    <Draggable
+                      draggableId={task.id}
+                      index={index}
+                      key={task.id}
+                    >
                       {provided => {
                         return (
                           <ListItem
                             innerRef={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            key={index}
+                            key={task.id}
                             id={index}
-                            role={undefined}
                           >
                             <ListItemIcon>
                               <Checkbox
-                                onClick={() => {
-                                  props.checkBoxToggle(index);
+                                onChange={event => {
+                                  props.checkBoxToggle(
+                                    task.id,
+                                    event.target.checked,
+                                  );
                                 }}
                                 edge="start"
                                 tabIndex={-1}
                                 disableRipple
-                                inputProps={{ 'aria-labelledby': labelId }}
-                                checked={
-                                  props.checkedState.indexOf(index) !== -1
-                                }
+                                inputProps={{ 'aria-labelledby': task.id }}
+                                checked={task.isDone}
                               />
                             </ListItemIcon>
                             <ListItemText
                               style={{
-                                textDecoration:
-                                  props.checkedState.indexOf(index) !== -1
-                                    ? 'line-through'
-                                    : 'none',
+                                textDecoration: task.isDone
+                                  ? 'line-through'
+                                  : 'none',
                               }}
-                              id={labelId}
-                              primary={`${task.field}`}
+                              id={task.id}
+                              primary={`${task.value}`}
                             />
                             <Tooltip title="Update">
                               <IconButton
                                 onClick={() =>
-                                  props.onUpdate(index, task.field)
+                                  props.onUpdate(task.id, task.value)
                                 }
                                 edge="end"
                                 aria-label="update"
@@ -118,7 +108,7 @@ function Display(props) {
                             </Tooltip>
                             <Tooltip title="Delete">
                               <IconButton
-                                onClick={() => props.onDelete(index)}
+                                onClick={() => props.onDelete(task.id)}
                                 edge="end"
                                 aria-label="delete"
                               >
@@ -142,17 +132,16 @@ function Display(props) {
 }
 
 const mapStateToProps = state => {
-  console.log(state.list.list);
   return {
-    arrayList: state.list.list,
-    checkedState: state.checkBox.checked,
+    arrayList: _.sortBy(state.list.list, task => task.sortOrder),
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    checkBoxToggle: v => dispatch(setCheck(v)),
-    dndUpdate: arr => dispatch(dndUpdateList(arr)),
+    checkBoxToggle: (id, v) => dispatch(setCheck(id, v)),
+    dndUpdate: (destination, source) =>
+      dispatch(dndUpdateList(destination, source)),
     // checkBoxUpdate: (s, d) => dispatch(updateChecked(s, d)),
   };
 };
