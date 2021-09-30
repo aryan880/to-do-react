@@ -11,9 +11,6 @@ import './Display.css';
 import { StylesProvider } from '@material-ui/styles';
 import { Tooltip } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { connect } from 'react-redux';
-import { dndUpdateList, setCheck, updateChecked } from '../List/ListActions';
-import _ from 'lodash';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -25,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-function Display(props) {
+export default function Display(props) {
   const classes = useStyles();
 
   function onDragEnd(result) {
@@ -41,7 +38,7 @@ function Display(props) {
       return;
     }
 
-    props.dndUpdate(destination.index, source.index);
+    props.dndUpdateList(destination.index, source.index);
   }
   return (
     <StylesProvider injectFirst>
@@ -54,8 +51,7 @@ function Display(props) {
                 {...provided.droppableProps}
                 className={classes.root}
               >
-                {props.arrayList.map((task, index) => {
-                  console.log(task);
+                {props.item.map((task, index) => {
                   return (
                     <Draggable
                       draggableId={task.id}
@@ -130,20 +126,3 @@ function Display(props) {
     </StylesProvider>
   );
 }
-
-const mapStateToProps = state => {
-  return {
-    arrayList: _.sortBy(state.list.list, task => task.sortOrder),
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    checkBoxToggle: (id, v) => dispatch(setCheck(id, v)),
-    dndUpdate: (destination, source) =>
-      dispatch(dndUpdateList(destination, source)),
-    // checkBoxUpdate: (s, d) => dispatch(updateChecked(s, d)),
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Display);

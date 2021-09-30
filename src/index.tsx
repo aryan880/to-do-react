@@ -24,8 +24,6 @@ import { configureAppStore } from 'store/configureStore';
 
 import reportWebVitals from 'reportWebVitals';
 
-import { PersistGate } from 'redux-persist/integration/react';
-
 // Initialize languages
 import './locales/i18n';
 

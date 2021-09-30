@@ -1,6 +1,6 @@
-import List from 'app/components/List/List';
+import List from 'app/pages/HomePage/components/List/List';
 import { Helmet } from 'react-helmet-async';
-import Display from 'app/components/Display/Display';
+import Display from 'app/pages/HomePage/components/Display/Display';
 import './index.css';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -9,24 +9,44 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { Button } from '@material-ui/core';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHomeSlice } from './slice';
 import {
-  addList,
-  addTask,
-  addUpdatedTask,
-  closeUpdateDialog,
-  deleteList,
-  openUpdateDialog,
-  updateInfo,
-  updateList,
-} from 'app/components/List/ListActions';
+  selectInfo,
+  selectList,
+  selectTask,
+  selectUpdateDialogCondition,
+} from './slice/selectors';
 
-function HomePage(props) {
+export function HomePage() {
+  const { actions } = useHomeSlice();
+
+  const dispatch = useDispatch();
+  const updateDialogState = useSelector(selectUpdateDialogCondition);
+  const info = useSelector(selectInfo);
+  const list = useSelector(selectList);
+  const task = useSelector(selectTask);
+
+  console.log(task, info);
+
+  const onAdd = task => {
+    dispatch(actions.addList(task.field));
+  };
+
+  const onUpdate = (id, value) => {
+    dispatch(actions.openUpdate());
+    dispatch(actions.updateInfo(id, value));
+    dispatch(actions.updateTask(value));
+  };
+
+  const onDelete = id => {
+    dispatch(actions.deleteList(id));
+  };
+
   function handleUpdate() {
-    props.openUpdate();
-    props.updatedTask('');
-    props.updateList(props.infoId, props.task.field);
-    props.closeUpdate();
+    dispatch(actions.openUpdate());
+    dispatch(actions.updateList(info.id, task.field));
+    dispatch(actions.closeUpdate());
   }
 
   return (
@@ -37,22 +57,26 @@ function HomePage(props) {
       </Helmet>
       <h1 className="heading">ToDo List</h1>
       <List
-        onAdd={() => {
-          props.list(props.task);
-          props.addTask('');
+        onAdd={task => {
+          onAdd(task);
         }}
+        item={list}
       />
-      {props.listArray.length !== 0 ? (
+      {list.length !== 0 ? (
         <Display
-          onUpdate={(id, text) => {
-            props.openUpdate();
-            props.updateInfo(id, text);
-            props.updatedTask(text);
+          onUpdate={(id, value) => {
+            onUpdate(id, value);
           }}
           onDelete={id => {
-            props.delete(id);
+            onDelete(id);
           }}
-          item={props.item}
+          item={list}
+          checkBoxToggle={(id, checked) => {
+            dispatch(actions.checkBoxToggle(id, checked));
+          }}
+          dndUpdateList={(destinationIndex, sourceIndex) => {
+            dispatch(actions.dndUpdateList(destinationIndex, sourceIndex));
+          }}
         />
       ) : (
         ''
@@ -60,11 +84,11 @@ function HomePage(props) {
       <Dialog
         fullWidth
         maxWidth="md"
-        open={props.updateDialog}
+        open={updateDialogState}
         aria-labelledby="form-dialog-title"
         onClose={() => {
-          props.closeUpdate();
-          props.updatedTask('');
+          dispatch(actions.closeUpdate());
+          dispatch(actions.updateTask(''));
         }}
       >
         <DialogTitle id="form-dialog-title">Edit Task</DialogTitle>
@@ -78,10 +102,10 @@ function HomePage(props) {
             label="Task..."
             type="text"
             fullWidth
-            onChange={e => props.updatedTask(e.target.value)}
-            defaultValue={props.infoText}
+            onChange={e => dispatch(actions.updateTask(e.target.value))}
+            defaultValue={info.value}
             onKeyPress={e => {
-              if (e.key === 'Enter' && props.task.field.length !== 0) {
+              if (e.key === 'Enter' && task.field.length !== 0) {
                 handleUpdate();
               }
             }}
@@ -90,15 +114,15 @@ function HomePage(props) {
         <DialogActions>
           <Button
             onClick={() => {
-              props.closeUpdate();
-              props.updatedTask('');
+              dispatch(actions.closeUpdate());
+              dispatch(actions.updateTask(''));
             }}
             color="primary"
           >
             Cancel
           </Button>
           <Button
-            disabled={props.task.field.length !== 0 ? false : true}
+            disabled={task.field.length !== 0 ? false : true}
             onClick={handleUpdate}
             color="primary"
           >
@@ -109,33 +133,3 @@ function HomePage(props) {
     </>
   );
 }
-const mapStateToProps = state => {
-  console.log(state);
-  return {
-    task: state.task,
-    item: state.list.list,
-    updateDialog: state.updateDialog.updateOpen,
-    listArray: state.list.list,
-    infoId: state.update.id,
-    infoText: state.update.text,
-  };
-};
-const mapDispatchToProps = dispatch => {
-  return {
-    list: task => dispatch(addList(task)),
-    delete: id => dispatch(deleteList(id)),
-    openUpdate: () => dispatch(openUpdateDialog()),
-    closeUpdate: () => dispatch(closeUpdateDialog()),
-    addTask: v => dispatch(addTask(v)),
-    updatedTask: v => dispatch(addUpdatedTask(v)),
-    updateInfo: (id, text) => dispatch(updateInfo(id, text)),
-    updateList: (updateInfo, task) => dispatch(updateList(updateInfo, task)),
-  };
-};
-
-const HomePageContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(HomePage);
-
-export { HomePageContainer };

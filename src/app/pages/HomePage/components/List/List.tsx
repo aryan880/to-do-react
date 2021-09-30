@@ -10,15 +10,33 @@ import { Button } from '@material-ui/core';
 import { StylesProvider } from '@material-ui/styles';
 
 import './List.css';
-import { connect } from 'react-redux';
-import { addTask, closeDialog, openDialog } from './ListActions';
 import { Alert, AlertTitle } from '@mui/material';
+import { useListSlice } from './slice';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectDialogCondition, selectTask } from './slice/selectors';
 
-function List(props) {
+export default function List(props) {
+  const dispatch = useDispatch();
+  const { actions } = useListSlice();
+  const dialogState = useSelector(selectDialogCondition);
+  const task = useSelector(selectTask);
+
+  const changeTask = value => {
+    dispatch(actions.addTask(value));
+  };
+
+  const openDialog = () => {
+    dispatch(actions.openDialog());
+  };
+
+  const closeDialog = () => {
+    dispatch(actions.closeDialog());
+  };
+
   return (
     <>
       <StylesProvider injectFirst>
-        {props.listArray.length === 0 ? (
+        {props.item.length === 0 ? (
           <Alert severity="info">
             <AlertTitle>Info</AlertTitle>
             Click the button below to <strong>add tasks!</strong>
@@ -26,18 +44,18 @@ function List(props) {
         ) : (
           ''
         )}
-        <Fab size="large" onClick={props.open} aria-label="add">
+        <Fab size="large" onClick={openDialog} aria-label="add">
           <Add />
         </Fab>
       </StylesProvider>
       <Dialog
         fullWidth
         maxWidth="md"
-        open={props.condition}
+        open={dialogState}
         aria-labelledby="form-dialog-title"
         onClose={() => {
-          props.close();
-          props.task('');
+          closeDialog();
+          changeTask('');
         }}
       >
         <DialogTitle id="form-dialog-title">Add Task</DialogTitle>
@@ -45,10 +63,10 @@ function List(props) {
           <DialogContentText>Add Your Daily Tasks</DialogContentText>
           <TextField
             onKeyPress={e => {
-              if (e.key === 'Enter' && props.item.field.length !== 0) {
-                props.onAdd();
-                props.task('');
-                props.close();
+              if (e.key === 'Enter' && task.field.length !== 0) {
+                props.onAdd(task);
+                changeTask('');
+                closeDialog();
               }
             }}
             autoFocus
@@ -58,15 +76,15 @@ function List(props) {
             label="Task..."
             type="text"
             fullWidth
-            onChange={e => props.task(e.target.value)}
+            onChange={e => changeTask(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
           <Button
             id="cancel"
             onClick={() => {
-              props.close();
-              props.task('');
+              closeDialog();
+              changeTask('');
             }}
             color="primary"
           >
@@ -74,12 +92,12 @@ function List(props) {
           </Button>
           <Button
             onClick={() => {
-              props.onAdd();
-              props.task('');
-              props.close();
+              props.onAdd(task);
+              changeTask('');
+              closeDialog();
             }}
             color="primary"
-            disabled={props.item.field.length !== 0 ? false : true}
+            disabled={task.field.length !== 0 ? false : true}
           >
             Add
           </Button>
@@ -88,21 +106,3 @@ function List(props) {
     </>
   );
 }
-const mapStateToProps = state => {
-  console.log(state.task.field.length);
-  return {
-    condition: state.dialog.open,
-    item: state.task,
-    listArray: state.list.list,
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    open: () => dispatch(openDialog()),
-    close: () => dispatch(closeDialog()),
-    task: v => dispatch(addTask(v)),
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(List);

@@ -57,7 +57,7 @@ export const deleteList = id => {
 export const updateList = (id, text) => {
   return {
     type: UPDATE_LIST,
-    payload: [id, text],
+    payload: { id, text },
   };
 };
 
@@ -76,7 +76,7 @@ export const closeUpdateDialog = () => {
 export const updateInfo = (id, text) => {
   return {
     type: UPDATE_INFO,
-    payload: [id, text],
+    payload: { id, text },
   };
 };
 
