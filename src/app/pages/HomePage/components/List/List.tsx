@@ -21,18 +21,6 @@ export default function List(props) {
   const dialogState = useSelector(selectDialogCondition);
   const task = useSelector(selectTask);
 
-  const changeTask = value => {
-    dispatch(actions.addTask(value));
-  };
-
-  const openDialog = () => {
-    dispatch(actions.openDialog());
-  };
-
-  const closeDialog = () => {
-    dispatch(actions.closeDialog());
-  };
-
   return (
     <>
       <StylesProvider injectFirst>
@@ -44,7 +32,13 @@ export default function List(props) {
         ) : (
           ''
         )}
-        <Fab size="large" onClick={openDialog} aria-label="add">
+        <Fab
+          size="large"
+          onClick={() => {
+            dispatch(actions.openDialog());
+          }}
+          aria-label="add"
+        >
           <Add />
         </Fab>
       </StylesProvider>
@@ -54,8 +48,8 @@ export default function List(props) {
         open={dialogState}
         aria-labelledby="form-dialog-title"
         onClose={() => {
-          closeDialog();
-          changeTask('');
+          dispatch(actions.closeDialog());
+          dispatch(actions.addTask(''));
         }}
       >
         <DialogTitle id="form-dialog-title">Add Task</DialogTitle>
@@ -65,8 +59,8 @@ export default function List(props) {
             onKeyPress={e => {
               if (e.key === 'Enter' && task.field.length !== 0) {
                 props.onAdd(task);
-                changeTask('');
-                closeDialog();
+                dispatch(actions.addTask(''));
+                dispatch(actions.closeDialog());
               }
             }}
             autoFocus
@@ -76,15 +70,17 @@ export default function List(props) {
             label="Task..."
             type="text"
             fullWidth
-            onChange={e => changeTask(e.target.value)}
+            onChange={e => {
+              dispatch(actions.addTask(e.target.value));
+            }}
           />
         </DialogContent>
         <DialogActions>
           <Button
             id="cancel"
             onClick={() => {
-              closeDialog();
-              changeTask('');
+              dispatch(actions.closeDialog());
+              dispatch(actions.addTask(''));
             }}
             color="primary"
           >
@@ -93,8 +89,8 @@ export default function List(props) {
           <Button
             onClick={() => {
               props.onAdd(task);
-              changeTask('');
-              closeDialog();
+              dispatch(actions.addTask(''));
+              dispatch(actions.closeDialog());
             }}
             color="primary"
             disabled={task.field.length !== 0 ? false : true}

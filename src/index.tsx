@@ -8,7 +8,6 @@
 import 'react-app-polyfill/ie11';
 import 'react-app-polyfill/stable';
 
-import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
@@ -24,6 +23,8 @@ import { configureAppStore } from 'store/configureStore';
 
 import reportWebVitals from 'reportWebVitals';
 
+import { PersistGate } from 'redux-persist/integration/react';
+
 // Initialize languages
 import './locales/i18n';
 
@@ -31,9 +32,11 @@ const store = configureAppStore() as any;
 const MOUNT_NODE = document.getElementById('root') as HTMLElement;
 
 ReactDOM.render(
-  <Provider store={store}>
+  <Provider store={store.store}>
     <HelmetProvider>
-      <App />
+      <PersistGate loading={null} persistor={store.persistor}>
+        <App />
+      </PersistGate>
     </HelmetProvider>
   </Provider>,
   MOUNT_NODE,
