@@ -11,17 +11,9 @@ import { createInjectorsEnhancer } from 'redux-injectors';
 import createSagaMiddleware from 'redux-saga';
 
 import { createReducer } from './reducers';
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
+import { watcherSaga } from './sagas/rootSaga';
 
 export function configureAppStore() {
-  const persistConfig = {
-    key: 'root',
-    storage,
-  };
-
-  const persistedReducer = persistReducer(persistConfig, createReducer());
-
   const reduxSagaMonitorOptions = {};
   const sagaMiddleware = createSagaMiddleware(reduxSagaMonitorOptions);
   const { run: runSaga } = sagaMiddleware;
@@ -37,11 +29,13 @@ export function configureAppStore() {
   ] as StoreEnhancer[];
 
   const store = configureStore({
-    reducer: persistedReducer,
+    reducer: createReducer(),
     middleware: [...getDefaultMiddleware(), ...middlewares],
     devTools: process.env.NODE_ENV !== 'production',
     enhancers,
   });
-  let persistor = persistStore(store);
-  return { store, persistor };
+
+  sagaMiddleware.run(watcherSaga);
+
+  return store;
 }

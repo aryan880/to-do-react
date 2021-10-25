@@ -2,7 +2,6 @@ import { createSlice } from 'utils/@reduxjs/toolkit';
 import { useInjectReducer } from 'utils/redux-injectors';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { homePageTypes } from './types';
-import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 
 export const initialState: homePageTypes = {
@@ -16,32 +15,60 @@ const slice = createSlice({
   name: 'homePage',
   initialState,
   reducers: {
-    addList(state, action: PayloadAction<any>) {
-      let sortOrder = 1;
-
-      if (state.list.length > 0) {
-        const task = _.maxBy(state.list, todo => {
-          return todo.sortOrder;
+    getData() {},
+    setData(state, action: PayloadAction<any>) {
+      console.log('Payload is', action.payload);
+      return {
+        ...state,
+        list: [...action.payload],
+      };
+    },
+    getDataById: {
+      reducer: (state, action: PayloadAction<any>) => {
+        state.list = state.list.filter(item => {
+          return item.id === action.payload.id;
         });
-
-        sortOrder = task.sortOrder + 1;
-      }
-      state.list.push({
-        id: uuidv4(),
-        value: action.payload,
-        isDone: false,
-        sortOrder,
-      });
+      },
+      prepare: id => {
+        return { payload: { id } };
+      },
     },
 
-    deleteList(state, action: PayloadAction<any>) {
+    // addList(state, action: PayloadAction<any>) {
+    //   let sortOrder = 1;
+
+    //   if (state.list.length > 0) {
+    //     const task = _.maxBy(state.list, todo => {
+    //       return todo.sortOrder;
+    //     });
+
+    //     sortOrder = task.sortOrder + 1;
+    //   }
+    //   state.list.push({
+    //     id: uuidv4(),
+    //     value: action.payload,
+    //     isDone: false,
+    //     sortOrder,
+    //   });
+    // },
+    postData: {
+      reducer: (state, action: PayloadAction<any>) => {
+        console.log(action.payload);
+      },
+      prepare: (value, sortOrder) => {
+        return { payload: { value, sortOrder } };
+      },
+    },
+
+    deleteDataById(state, action: PayloadAction<any>) {
       console.log('Delete');
+      console.log(action.payload);
       state.list = state.list.filter(item => {
         return item.id !== action.payload;
       });
     },
 
-    updateList: {
+    updateDataById: {
       reducer: (state, action: PayloadAction<any>) => {
         state.list = state.list.map(l => {
           if (l.id === action.payload.id) {
@@ -58,28 +85,30 @@ const slice = createSlice({
 
     dndUpdateList: {
       reducer: (state, action: PayloadAction<any>) => {
-        const source = _.find(state.list, (item, index) => {
-          return index === action.payload.sourceIndex;
-        });
+        // const source = _.find(state.list, (item, index) => {
+        //   return index === action.payload.sourceIndex;
+        // });
 
-        const destination = _.find(state.list, (item, index) => {
-          return index === action.payload.destinationIndex;
-        });
+        // const destination = _.find(state.list, (item, index) => {
+        //   return index === action.payload.destinationIndex;
+        // });
 
         state.list = state.list.map((l, index) => {
           if (index === action.payload.sourceIndex) {
-            return { ...l, sortOrder: destination.sortOrder };
+            return { ...l, sortOrder: action.payload.destination.sortOrder };
           }
 
           if (index === action.payload.destinationIndex) {
-            return { ...l, sortOrder: source.sortOrder };
+            return { ...l, sortOrder: action.payload.source.sortOrder };
           }
           return l;
         });
         state.list = _.sortBy(state.list, i => i.sortOrder);
       },
-      prepare: (destinationIndex, sourceIndex) => {
-        return { payload: { destinationIndex, sourceIndex } };
+      prepare: (destination, destinationIndex, source, sourceIndex) => {
+        return {
+          payload: { destination, destinationIndex, source, sourceIndex },
+        };
       },
     },
 
@@ -91,7 +120,7 @@ const slice = createSlice({
       state.updateDialogState = false;
     },
 
-    checkBoxToggle: {
+    updateCheckBoxById: {
       reducer: (state, action: PayloadAction<any>) => {
         state.list = state.list.map(l => {
           if (l.id === action.payload.id) {

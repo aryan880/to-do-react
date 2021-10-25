@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import List from 'app/pages/HomePage/components/List/List';
 import { Helmet } from 'react-helmet-async';
 import Display from 'app/pages/HomePage/components/Display/Display';
@@ -17,20 +18,40 @@ import {
   selectTask,
   selectUpdateDialogCondition,
 } from './slice/selectors';
+import _ from 'lodash';
 
-export function HomePage() {
+export function HomePage(props) {
   const { actions } = useHomeSlice();
-
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (props.match.params.hasOwnProperty('id')) {
+      dispatch(actions.getDataById(props.match.params.id));
+    } else {
+      dispatch(actions.getData());
+      console.log('Calling get data');
+      console.log('No params');
+    }
+  }, []);
+
   const updateDialogState = useSelector(selectUpdateDialogCondition);
   const info = useSelector(selectInfo);
   const list = useSelector(selectList);
   const task = useSelector(selectTask);
 
-  console.log(task, info);
+  console.log(props);
 
   const onAdd = task => {
-    dispatch(actions.addList(task.field));
+    let sortOrder = 1;
+
+    if (list.length > 0) {
+      const task = _.maxBy(list, todo => {
+        return todo.sortOrder;
+      });
+
+      sortOrder = task.sortOrder + 1;
+    }
+    dispatch(actions.postData(task.field, sortOrder));
   };
 
   const onUpdate = (id, value) => {
@@ -40,12 +61,11 @@ export function HomePage() {
   };
 
   const onDelete = id => {
-    dispatch(actions.deleteList(id));
+    dispatch(actions.deleteDataById(id));
   };
 
   function handleUpdate() {
-    dispatch(actions.openUpdate());
-    dispatch(actions.updateList(info.id, task.field));
+    dispatch(actions.updateDataById(info.id, task.field));
     dispatch(actions.closeUpdate());
   }
 
@@ -72,10 +92,24 @@ export function HomePage() {
           }}
           item={list}
           checkBoxToggle={(id, checked) => {
-            dispatch(actions.checkBoxToggle(id, checked));
+            dispatch(actions.updateCheckBoxById(id, checked));
           }}
           dndUpdateList={(destinationIndex, sourceIndex) => {
-            dispatch(actions.dndUpdateList(destinationIndex, sourceIndex));
+            const source = _.find(list, (item, index) => {
+              return index === sourceIndex;
+            });
+
+            const destination = _.find(list, (item, index) => {
+              return index === destinationIndex;
+            });
+            dispatch(
+              actions.dndUpdateList(
+                destination,
+                destinationIndex,
+                source,
+                sourceIndex,
+              ),
+            );
           }}
         />
       ) : (
